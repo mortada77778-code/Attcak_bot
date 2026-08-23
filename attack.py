@@ -208,4 +208,7 @@ async def scheduled_attack():
 
 bot.run(os.getenv("BOT_TOKEN"))
 
+@bot.command(name="سيدريك")
+async def made_by_cedric(ctx):
+    await ctx.send("تم الصناعة بواسطة سيدريك")
 
