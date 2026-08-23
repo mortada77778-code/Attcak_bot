@@ -3,17 +3,22 @@ from discord.ext import commands
 import random
 import os
 
+# إعدادات الصلاحيات (Intents)
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+
+# تعريف البوت مع بادئة الأوامر !
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# توقيع المطور
 AUTHOR_SIGNATURE = "\n\n_— تم الصناعة بواسطة سيدريك 🪄_"
 
 @bot.event
 async def on_ready():
     print(f"تم تسجيل الدخول بنجاح لبوت الهجوم باسم: {bot.user}")
 
+# ----------------- أمر الهجوم السحري (!هجوم) ----------------- #
 @bot.command(name="هجوم")
 async def attack_member(ctx, member: discord.Member):
     attacks = [
@@ -32,12 +37,26 @@ async def attack_member(ctx, member: discord.Member):
         f"{AUTHOR_SIGNATURE}"
     )
 
+# ----------------- أمر معلومات البوت (!about) ----------------- #
 @bot.command(name="about")
 async def about_bot(ctx):
-    await ctx.send("🔮 أنا بوت الهجوم السحري، جاهز للمعارك!\n" + AUTHOR_SIGNATURE)
+    await ctx.send(
+        "🔮 **[ سجلات معهد هوجوورتس للسحرة ]** 🔮\n"
+        "أنا بوت الهجوم السحري، مخصص لإشعال الحماس وإدارة المعارك في السيرفر بكل قوة!\n"
+        f"🛡️ الحالة: شغال 24 ساعة بدون توقف.\n"
+        f"{AUTHOR_SIGNATURE}"
+    )
 
-@bot.command(name="help")
+# ----------------- أمر قائمة الأوامر (!اوامر) ----------------- #
+@bot.command(name="اوامر")
 async def help_menu(ctx):
-    await ctx.send("📜 الأوامر: `!هجوم @الشخص`, `!about`\n" + AUTHOR_SIGNATURE)
+    await ctx.send(
+        "📜 **[ تعاويذ وأوامر بوت الهجوم المتاحة ]** 📜\n\n"
+        "⚡ `!هجوم @الساحر` - لشن هجوم سحري عشوائي ومباغت على أي عضو!\n"
+        "ℹ️ `!about` - لمعرفة قصة البوت ومعلومات عنه.\n"
+        "❓ `!اوامر` - لعرض هذه القائمة السحرية.\n\n"
+        f"جاهزون دائماً للمعارك يا أبطال!{AUTHOR_SIGNATURE}"
+    )
 
+# تشغيل البوت باستخدام توكن البيئة
 bot.run(os.getenv("BOT_TOKEN"))
