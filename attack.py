@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import random
 import os
+import json
 
 # إعدادات البوت والصلاحيات
 intents = discord.Intents.default()
@@ -17,9 +18,37 @@ raid_active = False
 # التوقيع الرسمي للصانع
 AUTHOR_SIGNATURE = "\n\n_— تم الصناعة بواسطة سيدريك 🪄_"
 
-# قوائم اللاعبين ومستشفى سانت مانجو السحرية
-player_scores = {}  # {user_id: {"name": "اسم", "hits": عدد الضربات}}
-hospital_patients = set()  # مجموعة IDs المرضى في المستشفى حالياً
+# ملف حفظ البيانات لتفادي فقدانها عند إعادة تشغيل البوت
+DATA_FILE = "hacker_data.json"
+
+def load_data():
+    """تحميل النقاط والمرضى من الملف الخارجي لضمان عدم ضياعها"""
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                # تحويل المفاتيح إلى أرقام صحيح (IDs)
+                scores = {int(k): v for k, v in data.get("scores", {}).items()}
+                patients = set(int(pid) for pid in data.get("patients", []))
+                return scores, patients
+        except Exception:
+            pass
+    return {}, set()
+
+def save_data():
+    """حفظ البيانات فوراً في الملف الخارجي"""
+    data = {
+        "scores": player_scores,
+        "patients": list(hospital_patients)
+    }
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except Exception:
+        pass
+
+# تحميل البيانات عند تشغيل السكربت
+player_scores, hospital_patients = load_data()
 
 def get_health_bar(hp):
     filled = hp // 20
@@ -53,6 +82,7 @@ class VillageDefenseView(discord.ui.View):
             player_scores[user_id] = {"name": user_name, "hits": 0}
         player_scores[user_id]["hits"] += 1
         player_scores[user_id]["name"] = user_name
+        save_data() # حفظ البيانات فوراً
 
         if current_hp > 0:
             current_hp -= DAMAGE_PER_HIT  
@@ -78,6 +108,7 @@ class VillageDefenseView(discord.ui.View):
                     all_fighters = list(player_scores.keys())
                     victim_id = random.choice(all_fighters)
                     hospital_patients.add(victim_id)
+                    save_data() # حفظ البيانات فوراً
                     victim_name = player_scores[victim_id]["name"]
                     hospital_msg = f"\n\n🚑 **[ طوارئ مستشفى سانت مانجو ]**:\n✨ للأسف، تعرض البطل **{victim_name}** لعنة قوية أثناء المعركة وسقط مغشياً عليه! تم نقله فوراً إلى الطابق الرابع (قسم الإصابات السحرية). استخدموا أمر `!علاج @{victim_name}` لشفائه!"
 
@@ -119,6 +150,7 @@ async def start_raid_command(ctx):
 async def cure_patient(ctx, member: discord.Member):
     if member.id in hospital_patients:
         hospital_patients.remove(member.id)
+        save_data() # حفظ التحديث بعد الشفاء
         await ctx.send(
             f"🌿✨ **[ تعويذة شفاء ملكية من جناح المستشفى ]** ✨🌿\n\n"
             f"🪄 قام البطل **{ctx.author.name}** بالتلويح بعصاه السحرية واستخدام جرعة **'بيبر ووبل' (Pepperup Potion)** الفعالة للساحر **{member.name}**!\n"
@@ -197,6 +229,7 @@ async def scheduled_attack():
             all_fighters = list(player_scores.keys())
             victim_id = random.choice(all_fighters)
             hospital_patients.add(victim_id)
+            save_data() # حفظ البيانات تلقائياً
             victim_name = player_scores[victim_id]["name"]
             hospital_msg = f"\n\n🚑 **[ طوارئ المعركة الفائته ]**:\n✨ أُصيب الساحر **{victim_name}** ونُقل لمستشفى سانت مانجو! عالجوه بـ `!علاج @{victim_name}`."
 
@@ -213,5 +246,6 @@ async def scheduled_attack():
 
 # تشغيل البوت باستخدام متغير البيئة في رندر
 bot.run(os.getenv("BOT_TOKEN"))
+
 
 
