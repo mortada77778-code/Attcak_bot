@@ -203,4 +203,5 @@ async def scheduled_attack():
             view=VillageDefenseView()
         )
 
-bot.run("MTU0MDYyNDk2MTk3MzAwMjI3MA.GZO9gX.ImGbJMkxFzsUTFN4J7aegpSiGwJCOXgxGWYUks")
+bot.run("YOUR_BOT_TOKEN_HERE")
+
