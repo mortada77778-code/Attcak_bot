@@ -203,5 +203,8 @@ async def scheduled_attack():
             view=VillageDefenseView()
         )
 
-bot.run("YOUR_BOT_TOKEN_HERE")
+
+
+bot.run(os.getenv("BOT_TOKEN"))
+
 
